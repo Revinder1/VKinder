@@ -1,18 +1,23 @@
 import requests
-
-import server
-
-
-class UserInfo():
-    def __init__(self):
-        pass
+import vk_api
+import config
+from vk_api.vk_api import VkApi
 
 
-    def get_user_name(self, user_id):
+class UserInfo:
+
+    def __init__(self, user_id):
+        self.vk_token = config.vk_api_token
+        self.vk_api = vk_api.VkApi(token=self.vk_token).get_api()
+        self.user_id = user_id
+
+
+    def get_user_name(self):
         """ Получаем имя пользователя"""
-        first_name = users.get(user_id=user_id)[0]['first_name']
-        last_name = users.get(user_id=user_id)[0]['last_name']
-        return f'{first_name} {last_name}'
+        fields = "age,sex,city,relation"
+        response = self.vk_api.users.get(user_id=self.user_id, fields=fields)
+
+        return response
 
     def get_user_city(self, user_id):
         """ Получаем город пользователя"""

@@ -38,7 +38,7 @@ class Server:
                 from_id = event.object["message"]["from_id"]
                 msg_text = event.object["message"]["text"]
                 if from_id not in self.users:
-                    self.users[from_id] = commander.Commander(self.api_token, self.group_id)
+                    self.users[from_id] = commander.Commander(self.api_token, self.group_id, from_id)
 
                 # В ИТОГЕ НУЖНО ОТПРАВИТЬ СООБЩЕНИЕ ЮЗЕРУ ЧЕРЕЗ КОММАНДЕР, ПРИЛОЖИВ КЛАВИАТУРУ ВКиндера
                     self.send_msg(peer_id, self.users[from_id].handle_message(msg_text))

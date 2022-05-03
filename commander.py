@@ -5,12 +5,13 @@ import user_initialiser
 
 
 class Commander(server.Server):
-    def __init__(self, api_token, group_id):
+    def __init__(self, api_token, group_id, user_id):
         super().__init__(api_token, group_id)
-        self.user = user_initialiser.UserInfo
+        self.user_id = user_id
+        self.user = user_initialiser.UserInfo(self.user_id)
 
     def handle_message(self, msg):
-        if msg.startswith("Моё имя"):
+        if msg.startswith("Мое имя"):
             return self.user.get_user_name()
 
 

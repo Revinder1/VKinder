@@ -1,8 +1,8 @@
 from commander import Commander
 from server import Server
-from config import vk_api_token
+import config
 
-server1 = Server(vk_api_token, 212988687, "server1")
+server1 = Server(config.vk_api_token, 212988687, "server1")
 # vk_api_token - API токен, который мы ранее создали
 # 212988687 - id сообщества-бота
 # "server1" - имя сервера
