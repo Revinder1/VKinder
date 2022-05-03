@@ -1,5 +1,6 @@
 import vk_api.vk_api
 from vk_api import VkUpload
+from vk_api import keyboard
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import random
 import requests
@@ -14,6 +15,7 @@ class Server:
         self.api_token = api_token
         self.group_id = group_id
         self.vk = vk_api.VkApi(token=api_token)
+        self.keyboard = vk_api.keyboard.VkKeyboard()
         # Для использования Long Poll API
         self.long_poll = VkBotLongPoll(self.vk, group_id)
         # Для вызова методов vk_api
@@ -59,19 +61,7 @@ class Server:
                     self.users[from_id][peer_id].handle_message(msg_text)
 
 
-
                 # В ИТОГЕ НУЖНО ОТПРАВИТЬ СООБЩЕНИЕ ЮЗЕРУ ЧЕРЕЗ КОММАНДЕР, ПРИЛОЖИВ КЛАВИАТУРУ ВКиндера
-
-
-
-                # self.send_msg(peer_id, self.users[from_id].handle_message(msg_text))
-
                 # ПОЛЕ relation МОЖЕТ ВООБЩЕ НЕ ВЕРНУТЬ НИЧЕГО(ДАЖЕ 0), НУЖНО ОБРАБОТАТЬ
 
-                # if msg_text == 'покажи клавиатуру':
-                #     self.send_msg(peer_id, message='test keyboard',
-                #                   keyboard=open('keyboards/keyboard.json', "r", encoding="UTF-8").read())
-                # elif msg_text == 'убери кнопки':
-                #     self.send_msg(peer_id, message='Отключаю клавиатуру', keyboard=open(
-                #         'keyboards/turn_off_keyboard.json', 'r', encoding='utf-8').read())
 
