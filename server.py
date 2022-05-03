@@ -1,18 +1,18 @@
-import random
-
-import requests
 import vk_api.vk_api
 from vk_api import VkUpload
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
-from random import randrange
-
-# Мб мне не нужно использовать BotLongPoll, а просто VkLongPoll как в задании
+import random
+import requests
+import commander
+import user_initialiser
 
 
 class Server:
 
     def __init__(self, api_token, group_id, server_name: str = "Empty"):
         self.server_name = server_name
+        self.api_token = api_token
+        self.group_id = group_id
         self.vk = vk_api.VkApi(token=api_token)
         # Для использования Long Poll API
         self.long_poll = VkBotLongPoll(self.vk, group_id)
@@ -20,10 +20,11 @@ class Server:
         self.vk_api = self.vk.get_api()
         self.upload = VkUpload(self.vk)
         self.session = requests.Session()
+        self.users = dict()
 
-    def send_msg(self, send_id, message=None, attachment=None):
+    def send_msg(self, send_id, message=None, attachment=None, keyboard=None):
         self.vk_api.messages.send(peer_id=send_id, attachment=attachment,
-                                  message=message, random_id=random.randrange(10 ** 7))
+                                  message=message, keyboard=keyboard, random_id=random.randrange(10 ** 7))
 
     def test(self):
         # Посылаем сообщение пользователю с указанным ID
@@ -33,47 +34,31 @@ class Server:
         for event in self.long_poll.listen():  # Слушаем сервер
             # Пришло новое сообщение
             if event.type == VkBotEventType.MESSAGE_NEW:
-                peer_id = event.object['message']['peer_id']
+                peer_id = event.object["message"]["peer_id"]
                 from_id = event.object["message"]["from_id"]
-                self.get_message_info(event)
-                self.send_msg(peer_id, f'{self.get_user_name(from_id)}, я получил Ваше сообщение!')
-                img = self.get_img_attachment(image_url='https://clck.ru/gi6GE', peer_id=peer_id)
-                self.send_msg(peer_id, attachment=img)
+                msg_text = event.object["message"]["text"]
+                if from_id not in self.users:
+                    self.users[from_id] = commander.Commander(self.api_token, self.group_id)
 
-    def get_message_info(self, event):
-        """
-        Информация о полученном сообщении
-        От кого/Из какого города/Текст сообщения/Куда получено сообщение(группа/личное сообщение)
-        """
-
-        user = self.get_user_name(event.object['message']['from_id'])
-        print("Username: " + user)
-        print("From: " + self.get_user_city(event.object['message']['from_id']))
-        print("Text: " + event.object['message']['text'])
-        print("Type: ", end="")
-        if event.object['message']['id'] > 0:
-            print("private message")
-        else:
-            print("group message")
-        print(" --- ")
+                # В ИТОГЕ НУЖНО ОТПРАВИТЬ СООБЩЕНИЕ ЮЗЕРУ ЧЕРЕЗ КОММАНДЕР, ПРИЛОЖИВ КЛАВИАТУРУ ВКиндера
+                    self.send_msg(peer_id, self.users[from_id].handle_message(msg_text))
+                # ПОЛЕ relation МОЖЕТ ВООБЩЕ НЕ ВЕРНУТЬ НИЧЕГО(ДАЖЕ 0), НУЖНО ОБРАБОТАТЬ
+                print(self.vk_api.users.get(user_id=from_id, fields="age,sex,city,relation"))
 
 
-    def get_user_name(self, user_id):
-        """ Получаем имя пользователя"""
 
-        first_name = self.vk_api.users.get(user_id=user_id)[0]['first_name']
-        last_name = self.vk_api.users.get(user_id=user_id)[0]['last_name']
-        return f'{first_name} {last_name}'
 
-    def get_user_city(self, user_id):
-        """ Получаем город пользователя"""
 
-        return self.vk_api.users.get(user_id=user_id, fields="city")[0]["city"]['title']
 
-    def get_img_attachment(self, image_url, peer_id):
-        attachments = []
-        image = self.session.get(image_url, stream=True)
-        photo = self.upload.photo_messages(photos=image.raw)[0]
-        attachments.append(f'photo{photo["owner_id"]}_{photo["id"]}')
-        return ','.join(attachments)
+                # if msg_text == 'покажи клавиатуру':
+                #     self.send_msg(peer_id, message='test keyboard',
+                #                   keyboard=open('keyboards/keyboard.json', "r", encoding="UTF-8").read())
+                # elif msg_text == 'убери кнопки':
+                #     self.send_msg(peer_id, message='Отключаю клавиатуру', keyboard=open(
+                #         'keyboards/turn_off_keyboard.json', 'r', encoding='utf-8').read())
+                # self.get_message_info(event)
+                # self.send_msg(peer_id, f'{self.get_user_name(from_id)}, я получил Ваше сообщение!')
+                # img = self.get_img_attachment(image_url='https://clck.ru/gi6GE', peer_id=peer_id)
+                # self.send_msg(peer_id, attachment=img)
+
 
