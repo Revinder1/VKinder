@@ -14,15 +14,19 @@ class UserInfo:
 
     def get_user_name(self):
         """ Получаем имя пользователя"""
-        fields = "age,sex,city,relation"
-        response = self.vk_api.users.get(user_id=self.user_id, fields=fields)
+        # fields = "age,sex,city,relation"
+        response = self.vk_api.users.get(user_id=self.user_id)
+        return f'{response[0]["first_name"]} {response[0]["last_name"]}'
 
-        return response
+    def get_user_age(self):
+        response = self.vk_api.users.get(user_id=self.user_id, fields='bdate')
+        print(response[0])
+        return response[0].get('bdate', 'скрыто')
 
-    def get_user_city(self, user_id):
+
+    def get_user_city(self):
         """ Получаем город пользователя"""
-
-        return self.vk_api.users.get(user_id=user_id, fields="city")[0]["city"]['title']
+        return self.vk_api.users.get(user_id=self.user_id, fields="city")[0]["city"]['title']
 
 
 

@@ -23,32 +23,50 @@ class Server:
         self.users = dict()
 
     def send_msg(self, send_id, message=None, attachment=None, keyboard=None):
-        self.vk_api.messages.send(peer_id=send_id, attachment=attachment,
-                                  message=message, keyboard=keyboard, random_id=random.randrange(10 ** 7))
+        return self.vk_api.messages.send(peer_id=send_id, attachment=attachment,
+                                         message=message, keyboard=keyboard, random_id=random.randrange(10 ** 7))
 
     def test(self):
         # Посылаем сообщение пользователю с указанным ID
         self.send_msg(77616340, "Привет-привет!")
 
     def start(self):
+
         for event in self.long_poll.listen():  # Слушаем сервер
             # Пришло новое сообщение
             if event.type == VkBotEventType.MESSAGE_NEW:
+                new_dict = dict()
                 peer_id = event.object["message"]["peer_id"]
                 from_id = event.object["message"]["from_id"]
                 msg_text = event.object["message"]["text"]
+                msg_type = event.object["message"]["id"]
+                print(event.object)
+                # ПРОВЕРКА НА НАЛИЧИЕ СВЯЗАННОГО ЮЗЕРА-КЛАССА В СЛОВАРЕ
                 if from_id not in self.users:
-                    self.users[from_id] = commander.Commander(self.api_token, self.group_id, from_id)
+                    new_dict[peer_id] = commander.Commander(self.api_token, self.group_id, from_id, peer_id, msg_type)
+                    self.users[from_id] = new_dict
+                    self.users[from_id][peer_id].handle_message(msg_text)
+
+                # ЕСЛИ ОДИН И ТОТ ЖЕ ЮЗЕР ОТПРАВЛЯЕТ СООБЩЕНИЯ С ЛС И ГРУППЫ, ДОБАВИТЬ В СЛОВАРЬ peer_id ГРУППЫ
+                # И СВЯЗАТЬ С КЛАССОМ
+                elif peer_id not in self.users[from_id]:
+                    # ПРИХОДИТСЯ ОБНОВЛЯТЬ ЗНАЧЕНИЕ В СЛОВАРЕ, ИНАЧЕ ПРИ ОТПРАВКЕ С ЛС/ГРУППЫ АТРИБУТЫ КЛАССА Commander
+                    # НЕ ОБНОВЛЯЮТСЯ И ОТПРАВЛЯЕТСЯ ТОЛЬКО В ОДНО МЕСТО
+                    self.users[from_id][peer_id] = commander.Commander(self.api_token, self.group_id, from_id, peer_id, msg_type)
+                    self.users[from_id][peer_id].handle_message(msg_text)
+
+                else:
+                    self.users[from_id][peer_id].handle_message(msg_text)
+
+
 
                 # В ИТОГЕ НУЖНО ОТПРАВИТЬ СООБЩЕНИЕ ЮЗЕРУ ЧЕРЕЗ КОММАНДЕР, ПРИЛОЖИВ КЛАВИАТУРУ ВКиндера
-                    self.send_msg(peer_id, self.users[from_id].handle_message(msg_text))
+
+
+
+                # self.send_msg(peer_id, self.users[from_id].handle_message(msg_text))
+
                 # ПОЛЕ relation МОЖЕТ ВООБЩЕ НЕ ВЕРНУТЬ НИЧЕГО(ДАЖЕ 0), НУЖНО ОБРАБОТАТЬ
-                print(self.vk_api.users.get(user_id=from_id, fields="age,sex,city,relation"))
-
-
-
-
-
 
                 # if msg_text == 'покажи клавиатуру':
                 #     self.send_msg(peer_id, message='test keyboard',
@@ -56,9 +74,4 @@ class Server:
                 # elif msg_text == 'убери кнопки':
                 #     self.send_msg(peer_id, message='Отключаю клавиатуру', keyboard=open(
                 #         'keyboards/turn_off_keyboard.json', 'r', encoding='utf-8').read())
-                # self.get_message_info(event)
-                # self.send_msg(peer_id, f'{self.get_user_name(from_id)}, я получил Ваше сообщение!')
-                # img = self.get_img_attachment(image_url='https://clck.ru/gi6GE', peer_id=peer_id)
-                # self.send_msg(peer_id, attachment=img)
-
 
