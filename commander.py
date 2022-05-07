@@ -20,23 +20,33 @@ class Commander(server.Server):
             return self.send_msg(self.peer_id, self.user.get_user_name())
         elif msg.startswith("Мой город"):
             return self.send_msg(self.peer_id, self.user.get_user_city())
-        elif msg.startswith("Мой возраст"):
-            return self.send_msg(self.peer_id, self.user.get_user_age())
-        elif msg == 'Покажи клавиатуру':
-            return self.send_msg(self.peer_id, message='Включаю',
-                                 keyboard=open('keyboards/keyboard.json', "r", encoding="UTF-8").read())
-        elif msg == 'Убери клавиатуру':
-            return self.send_msg(self.peer_id, message='Отключаю',
-                                 keyboard=open('keyboards/turn_off_keyboard.json', "r", encoding="UTF-8").read())
+        elif msg == "Мой пол":
+            return self.send_msg(self.peer_id, self.user.get_user_gender())
+        elif msg == "Дай фото":
+            return self.send_msg(self.peer_id, attachment=self.user.get_img_attachment(self.user.get_best_three_photo(self.user_id)))
+        # elif msg == "VKinder":
+        #     generator_reader(self.user.search_user_pair_info(49, 23, 24))
+        #     self.send_msg(self.peer_id, message=f'{generator_reader(self.user.search_user_pair_info(49, 23, 24))}')
+        #     if msg == "Еще":
+        #         self.send_msg(self.peer_id, message=f'{generator_reader(self.user.search_user_pair_info(49, 23, 24))}')
+        #
+        #     else:
+        #         return "Сброс"
 
-        return self.send_msg(self.peer_id, 'Не распознал команду')
 
-    # def get_keyboard(self, file):
-    #     with open(file, "r", encoding='UTF-8') as f:
 
-    def get_img_attachment(self, image_url, peer_id):
-        attachments = []
-        image = self.session.get(image_url, stream=True)
-        photo = self.upload.photo_messages(photos=image.raw)[0]
-        attachments.append(f'photo{photo["owner_id"]}_{photo["id"]}')
-        return ','.join(attachments)
+        # elif msg == 'Покажи клавиатуру':
+        #     return self.send_msg(self.peer_id, message='Включаю',
+        #                          keyboard=open('keyboards/keyboard.json', "r", encoding="UTF-8").read())
+        # elif msg == 'Убери клавиатуру':
+        #     return self.send_msg(self.peer_id, message='Отключаю',
+        #                          keyboard=open('keyboards/turn_off_keyboard.json', "r", encoding="UTF-8").read())
+        #
+        # return self.send_msg(self.peer_id, 'Не распознал команду')
+
+
+
+
+def generator_reader(generator):
+    return next(generator)
+

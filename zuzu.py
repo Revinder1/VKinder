@@ -4,11 +4,16 @@ from pprint import pprint
 import pandas as pd
 import requests
 import vk_api
+from vk_api import VkUpload
+
 import config
 
+vk = vk_api.VkApi(token=config.vk_api_user_token)
+api = vk.get_api()
+session = requests.Session()
+upload = VkUpload(vk)
 
-# vk = vk_api.VkApi(token=config.vk_api_user_token)
-# api = vk.get_api()
+
 def search_user_pair_info(city, age_from, age_to):
     # Добавить идентификацию - если написала девушка, изменить sex на 2
     params = {
@@ -24,8 +29,7 @@ def search_user_pair_info(city, age_from, age_to):
         'birth_month': 1,
         'status': 6,
         'fields': 'city,sex,relation,bdate'
-        }
-
+    }
 
     for i in range(1, 13):
         if i == 1:
@@ -37,17 +41,13 @@ def search_user_pair_info(city, age_from, age_to):
                 user_list.append(user)
         params['birth_month'] += 1
 
-
     for i in user_list:
-        if (i.get('city') is None) or i['city']['id'] != 49 or i.get('relation') is None:
+        if (i.get('city') is None) or i['city']['id'] != city or i.get('relation') is None:
             user_list.remove(i)
         else:
+            i = {'id': i["id"], 'first_name': i['first_name'], 'last_name': i['last_name'], 'city': i['city']['title'], 'link': f'https://vk.com/id{i["id"]}'}
             yield i
 
-
-# table_info = pd.DataFrame(search_user_pair_info(49, 23, 24))
-# for i in search_user_pair_info(49, 23, 24):
-#     print(i)
 
 
 def get_best_three_photo(owner_id):
@@ -68,7 +68,6 @@ def get_best_three_photo(owner_id):
         comments = photo['comments']['count']
         popularity = likes + comments
         max_size_url = max(sizes, key=get_largest)['url']
-        max_size_photo = max(sizes, key=get_largest)['type']
         most_popular[popularity] = max_size_url
 
     new_sorted_dict = dict(sorted(most_popular.items(), key=lambda x: x[0], reverse=True))
@@ -80,16 +79,38 @@ def get_best_three_photo(owner_id):
     return result
 
 
-
 def get_largest(size_dict):
     # Выясняю, горизонтально или вертикально-ориентирована фотография,
-    # что бы далее мог отсортировать по нужному параметру словари
+    # чтобы далее мог отсортировать по нужному параметру словари
 
     if size_dict['width'] >= size_dict['height']:
         return size_dict['width']
     return size_dict['height']
 
 
-# for i in get_best_three_photo(20246948):
-#     print(i)
-print(get_best_three_photo(20246948))
+def get_img_attachment(_list):
+    attachments = []
+    for url in _list:
+        image = session.get(url, stream=True)
+        photo = upload.photo_messages(photos=image.raw)[0]
+        attachments.append(f'photo{photo["owner_id"]}_{photo["id"]}')
+    return ','.join(attachments)
+
+
+# table_info = pd.DataFrame(search_user_pair_info(49, 23, 24))
+# a = table_info
+
+# with open('pump.json', 'a', encoding='utf-8') as f:
+#     for i in search_user_pair_info(49, 23, 24):
+#         json.dump(i, f, indent=2, ensure_ascii=False)
+# print(search_user_pair_info(49, 23, 24))
+# for m in search_user_pair_info(49, 23, 24):
+#     print(m)
+
+# print(get_best_three_photo(20246948))
+# print(get_img_attachment('https://sun9-82.userapi.com/s/v1/if1/jYQ7nn8IelSM2AbwVkAD1xB2PJY6zT56U-cQdUu8vx5qGQj3fNdCvhZjLG3p72leOS2BL3x_.jpg?size=864x864&quality=96&type=album'))
+# a = search_user_pair_info(49, 23, 24)
+# print(type(a))
+# for x in range(3):
+#     print(next(a))
+print(get_img_attachment(get_best_three_photo(20246948)))
