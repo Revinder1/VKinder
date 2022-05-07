@@ -43,20 +43,18 @@ class Server:
                 msg_text = event.object["message"]["text"]
                 msg_type = event.object["message"]["id"]
                 print(event.object)
-                # ПРОВЕРКА НА НАЛИЧИЕ СВЯЗАННОГО ЮЗЕРА-КЛАССА В СЛОВАРЕ
-                if msg_text == 'VKinder':
+                if msg_text.lower() == 'старт':
                     user_init = user_initialiser.UserInfo(from_id)
                     generator = user_init.search_user_pair_info(49, 23, 24)
                     post = commander.generator_reader(generator)['id']
                     post_link = f'https://vk.com/id{post} '
                     self.send_msg(peer_id, message=f'{post_link}', attachment=user_init.get_img_attachment(user_init.get_best_three_photo(post)))
-                elif msg_text == 'Еще':
+                elif msg_text.lower() == 'еще':
                     post = commander.generator_reader(generator)['id']
                     post_link = f'https://vk.com/id{post} '
                     self.send_msg(peer_id, message=f'{post_link}', attachment=user_init.get_img_attachment(user_init.get_best_three_photo(post)))
 
-
-
+                # ПРОВЕРКА НА НАЛИЧИЕ СВЯЗАННОГО ЮЗЕРА-КЛАССА В СЛОВАРЕ
                 if from_id not in self.users:
                     new_dict[peer_id] = commander.Commander(self.api_token, self.group_id, from_id, peer_id, msg_type)
                     self.users[from_id] = new_dict
