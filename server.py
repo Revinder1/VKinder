@@ -47,11 +47,13 @@ class Server:
                 if msg_text == 'VKinder':
                     user_init = user_initialiser.UserInfo(from_id)
                     generator = user_init.search_user_pair_info(49, 23, 24)
-                    for key, value in commander.generator_reader(generator).items():
-                        url = key['link']
-                    self.send_msg(peer_id, message=f'{commander.generator_reader(generator)[1]}', attachment=user_init.get_img_attachment(user_init.get_best_three_photo(post_id)))
+                    post = commander.generator_reader(generator)['id']
+                    post_link = f'https://vk.com/id{post} '
+                    self.send_msg(peer_id, message=f'{post_link}', attachment=user_init.get_img_attachment(user_init.get_best_three_photo(post)))
                 elif msg_text == 'Еще':
-                    self.send_msg(peer_id, message=f'{commander.generator_reader(generator)[1]}', attachment=user_init.get_img_attachment(user_init.get_best_three_photo(commander.generator_reader(generator)[0]['id'])))
+                    post = commander.generator_reader(generator)['id']
+                    post_link = f'https://vk.com/id{post} '
+                    self.send_msg(peer_id, message=f'{post_link}', attachment=user_init.get_img_attachment(user_init.get_best_three_photo(post)))
 
 
 
