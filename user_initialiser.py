@@ -13,8 +13,6 @@ class UserInfo:
         self.vk_user_token = config.vk_api_user_token
         self.vk_api = vk_api.VkApi(token=self.vk_token).get_api()
         self.user_id = user_id
-        self.upload = VkUpload(vk_api.VkApi(token=self.vk_token))
-        self.session = requests.Session()
 
 
     def get_user_gender(self):
@@ -30,7 +28,7 @@ class UserInfo:
     def get_user_name(self):
         """ Получаем имя пользователя"""
         response = self.vk_api.users.get(user_id=self.user_id)
-        return f'{response[0]["first_name"]} {response[0]["last_name"]}'
+        return f'{response[0]["first_name"]}'
 
 
     def get_user_city(self):
@@ -44,7 +42,6 @@ class UserInfo:
             'access_token': self.vk_user_token,
             'v': config.version,
             'count': 1000,
-            'sort': 1,
             'has_photo': 1,
             'city': city,
             'age_from': age_from,
@@ -75,7 +72,8 @@ class UserInfo:
                 i = {'id': i["id"], 'link': link, 'first_name': i['first_name'], 'last_name': i['last_name'], 'city': i['city']['title']}
                 yield i
 
-    def get_best_three_photo(self, owner_id):
+    @staticmethod
+    def get_best_three_photo(owner_id):
         user_url = 'https://api.vk.com/method/' + 'photos.get'
         user_params = {
             'access_token': config.vk_api_user_token,
@@ -103,18 +101,9 @@ class UserInfo:
         return result
 
 
-    def get_img_attachment(self, _list):
-        attachments = []
-        for url in _list:
-            image = self.session.get(url, stream=True)
-            photo = self.upload.photo_messages(photos=image.raw)[0]
-            attachments.append(f'photo{photo["owner_id"]}_{photo["id"]}')
-        return ','.join(attachments)
-
-
 def get_largest(size_dict):
     # Выясняю, горизонтально или вертикально-ориентирована фотография,
-    # чтобы далее мог отсортировать по нужному параметру словари
+    # чтобы далее мог отсортировать по нужному параметру словари в функции get_best_three_photo()
 
     if size_dict['width'] >= size_dict['height']:
         return size_dict['width']

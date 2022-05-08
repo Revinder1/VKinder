@@ -5,6 +5,7 @@ import pandas as pd
 import requests
 import vk_api
 from vk_api import VkUpload
+import re
 
 import config
 
@@ -107,10 +108,21 @@ def get_img_attachment(_list):
 # for m in search_user_pair_info(49, 23, 24):
 #     print(m)
 
-# print(get_best_three_photo(20246948))
-# print(get_img_attachment('https://sun9-82.userapi.com/s/v1/if1/jYQ7nn8IelSM2AbwVkAD1xB2PJY6zT56U-cQdUu8vx5qGQj3fNdCvhZjLG3p72leOS2BL3x_.jpg?size=864x864&quality=96&type=album'))
+
 # a = search_user_pair_info(49, 23, 24)
 # print(type(a))
 # for x in range(3):
 #     print(next(a))
-print(get_img_attachment(get_best_three_photo(20246948)))
+# print(get_img_attachment(get_best_three_photo(20246948)))
+
+# elif msg_text.lower() == '/отключить клавиатуру':
+#     self.send_msg(peer_id, message='Отключаю',
+#                   keyboard=open('keyboards/turn_off_keyboard.json', "r", encoding="UTF-8").read())
+msg = '18-25'
+pattern = r"(\d{2})-(\d{2})"
+sub_pattern = r"\1,\2"
+result = re.sub(pattern, sub_pattern, msg)
+print(type(result))
+if re.fullmatch(pattern, msg):
+    print('da')
+
