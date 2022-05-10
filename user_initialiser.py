@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import requests
 import vk_api
 from vk_api import VkUpload
@@ -54,6 +56,7 @@ class UserInfo:
         if self.get_user_gender() == 'Женский':
             params['sex'] = 2
         # Сбор данных по поиску, обходя лимит в 1000 пользователей
+        a = datetime.now()
         for i in range(1, 13):
             if i == 1:
                 res = requests.get('https://api.vk.com/method/' + 'users.search', params=params).json()
@@ -71,6 +74,8 @@ class UserInfo:
                 link = f'https://vk.com/id{i["id"]} '
                 i = {'id': i["id"], 'link': link, 'first_name': i['first_name'], 'last_name': i['last_name'], 'city': i['city']['title']}
                 yield i
+                b = datetime.now()
+                # print(b - a, 'eto yield')
 
     @staticmethod
     def get_best_three_photo(owner_id):

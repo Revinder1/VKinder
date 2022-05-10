@@ -1,5 +1,6 @@
 import random
 import re
+from datetime import datetime
 from random import randrange
 import vk_api
 import server
@@ -36,17 +37,23 @@ class Commander(server.Server):
                 else:
                     self.send_msg(self.peer_id, message='Не могу распознать Ваш город, измените настройки профиля')
                     return "Ошибка"
+                a = datetime.now()
                 self.generator = self.user.search_user_pair_info(city, self.age_from, self.age_to)
                 post = generator_reader(self.generator)['id']
                 post_link = f'https://vk.com/id{post} '
                 self.send_msg(self.peer_id, message=f'{post_link}',
                               attachment=self.get_img_attachment(self.user.get_best_three_photo(post)))
+                b = datetime.now()
+                print(b - a, 'eto start')
 
             if msg[1::].lower() == 'дальше':
+                a = datetime.now()
                 post = generator_reader(self.generator)['id']
                 post_link = f'https://vk.com/id{post} '
                 self.send_msg(self.peer_id, message=f'{post_link}',
                               attachment=self.get_img_attachment(self.user.get_best_three_photo(post)))
+                b = datetime.now()
+                print(b - a, 'eto dalshe')
 
 
         if re.fullmatch(self.age_pattern, msg):
