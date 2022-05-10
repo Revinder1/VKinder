@@ -1,5 +1,5 @@
 import json
-
+import db.db_model
 import vk_api.vk_api
 from vk_api import VkUpload
 from vk_api import keyboard
@@ -106,13 +106,37 @@ class Server:
                         peer_id=peer_id,
                         event_data=json.dumps(event.object['payload']))
                     self.users[from_id][peer_id].handle_message('/старт')
-                elif event.object['payload'].get('text') =="Загружаю следующую пару...":
+                elif event.object['payload'].get('text') == "Добавляем в избранное...":
                     r = self.vk_api.messages.sendMessageEventAnswer(
                         event_id=event.object['event_id'],
                         user_id=from_id,
                         peer_id=peer_id,
                         event_data=json.dumps(event.object['payload']))
-                    self.users[from_id][peer_id].handle_message('/дальше')
+                    self.users[from_id][peer_id].handle_message('/нравится')
+
+                elif event.object['payload'].get('text') == "Больше этот человек не попадется...":
+                    r = self.vk_api.messages.sendMessageEventAnswer(
+                        event_id=event.object['event_id'],
+                        user_id=from_id,
+                        peer_id=peer_id,
+                        event_data=json.dumps(event.object['payload']))
+                    self.users[from_id][peer_id].handle_message('/не нравится')
+
+                elif event.object['payload'].get('text') == "Загружаем избранных...":
+                    r = self.vk_api.messages.sendMessageEventAnswer(
+                        event_id=event.object['event_id'],
+                        user_id=from_id,
+                        peer_id=peer_id,
+                        event_data=json.dumps(event.object['payload']))
+                    self.users[from_id][peer_id].handle_message('/избранные')
+
+                elif event.object['payload'].get('text') == "Загружаем черный список...":
+                    r = self.vk_api.messages.sendMessageEventAnswer(
+                        event_id=event.object['event_id'],
+                        user_id=from_id,
+                        peer_id=peer_id,
+                        event_data=json.dumps(event.object['payload']))
+                    self.users[from_id][peer_id].handle_message('/не нравится')
 
 
 
@@ -124,10 +148,12 @@ class Server:
         kbrd = keyboard.VkKeyboard(one_time=False)
         kbrd.add_callback_button("Старт", keyboard.VkKeyboardColor.PRIMARY, payload={"type": "show_snackbar", "text": "Подбираю пару..."})
         kbrd.add_line()
-        kbrd.add_button("/Не нравится", keyboard.VkKeyboardColor.NEGATIVE)
-        kbrd.add_button("/Нравится", keyboard.VkKeyboardColor.POSITIVE)
-        kbrd.add_callback_button("Дальше", keyboard.VkKeyboardColor.PRIMARY, payload={"type": "show_snackbar", "text": "Загружаю следующую пару..."})
+        kbrd.add_button("Не нравится", keyboard.VkKeyboardColor.NEGATIVE, payload={"type": "show_snackbar", "text": "Больше этот человек не попадется..."})
+        kbrd.add_callback_button("Нравится", keyboard.VkKeyboardColor.POSITIVE, payload={"type": "show_snackbar", "text": "Добавляем в избранное..."})
         kbrd.add_line()
-        kbrd.add_openlink_button("/RICKROLL", link='https://youtu.be/dQw4w9WgXcQ')
+        kbrd.add_callback_button("Показать избранное", keyboard.VkKeyboardColor.PRIMARY,
+                                 payload={"type": "show_snackbar", "text": "Загружаем избранных..."})
+        kbrd.add_callback_button("Показать черный список", keyboard.VkKeyboardColor.PRIMARY,
+                                 payload={"type": "show_snackbar", "text": "Загружаем черный список..."})
         kbrd.add_callback_button("Отключить клавиатуру", keyboard.VkKeyboardColor.NEGATIVE, payload={"type": "show_snackbar", "text": "Клавиатура отключена"})
         return kbrd.get_keyboard()

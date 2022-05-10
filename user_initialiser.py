@@ -35,7 +35,11 @@ class UserInfo:
 
     def get_user_city(self):
         """ Получаем город пользователя"""
-        return self.vk_api.users.get(user_id=self.user_id, fields="city")[0]["city"]['id']
+        try:
+            result = self.vk_api.users.get(user_id=self.user_id, fields="city")[0]["city"]['id']
+            return result
+        except KeyError:
+            return False
 
 
     def search_user_pair_info(self, city, age_from, age_to):
@@ -57,25 +61,20 @@ class UserInfo:
             params['sex'] = 2
         # Сбор данных по поиску, обходя лимит в 1000 пользователей
         a = datetime.now()
-        for i in range(1, 13):
-            if i == 1:
-                res = requests.get('https://api.vk.com/method/' + 'users.search', params=params).json()
-                user_list = [j for j in res['response']['items']]
-            else:
-                res = requests.get('https://api.vk.com/method/' + 'users.search', params=params).json()
-                for user in res['response']['items']:
-                    user_list.append(user)
+        for j in range(1, 13):
+            res = requests.get('https://api.vk.com/method/' + 'users.search', params=params).json()
+            for i in res['response']['items']:
+                if (i.get('city') is None) or i['city']['id'] != city or i.get('relation') is None:
+                    continue
+                else:
+                    link = f'https://vk.com/id{i["id"]} '
+                    i = {'id': i["id"], 'link': link, 'first_name': i['first_name'], 'last_name': i['last_name'],
+                         'city': i['city']['title']}
+                    yield i
+                    b = datetime.now()
+                    print(b - a, 'eto yield')
             params['birth_month'] += 1
 
-        for i in user_list:
-            if (i.get('city') is None) or i['city']['id'] != city or i.get('relation') is None:
-                user_list.remove(i)
-            else:
-                link = f'https://vk.com/id{i["id"]} '
-                i = {'id': i["id"], 'link': link, 'first_name': i['first_name'], 'last_name': i['last_name'], 'city': i['city']['title']}
-                yield i
-                b = datetime.now()
-                # print(b - a, 'eto yield')
 
     @staticmethod
     def get_best_three_photo(owner_id):
