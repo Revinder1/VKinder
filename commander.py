@@ -11,6 +11,7 @@ import json
 
 
 
+
 class Commander(server.Server):
     def __init__(self, api_token, group_id, user_id, peer_id, msg_type):
         super().__init__(api_token, group_id)
@@ -109,9 +110,10 @@ class Commander(server.Server):
                     self.previous_id = fav_link.vk_id
                     link = fav_link.link
                     photos = fav_link.link_photo_list
-                    self.send_msg(self.peer_id, message=f'{link}', attachment=photos)
-                    self.send_msg(self.peer_id, message='Ваш черный список',
+                    self.send_msg(self.peer_id, message='Ваши избранные',
                                   keyboard=self.create_fav_keyboard())
+                    self.send_msg(self.peer_id, message=f'{link}', attachment=photos)
+
                 except StopIteration:
                     self.send_msg(self.peer_id, message='Список избранных пуст, возвращаю к поиску партнера')
                     self.send_msg(self.peer_id, message='Нажмите "Старт", чтобы начать знакомиться',

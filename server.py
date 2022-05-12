@@ -1,5 +1,4 @@
 import json
-import db.db_model
 import vk_api.vk_api
 from vk_api import VkUpload
 from vk_api import keyboard
@@ -8,6 +7,7 @@ import random
 import requests
 import commander
 import user_initialiser
+
 
 
 class Server:
@@ -25,6 +25,7 @@ class Server:
         self.upload = VkUpload(self.vk)
         self.session = requests.Session()
         self.users = dict()
+
 
     def send_msg(self, send_id, message=None, attachment=None, keyboard=None, template=None):
         return self.vk_api.messages.send(peer_id=send_id, attachment=attachment,
@@ -47,7 +48,6 @@ class Server:
                               'Прежде чем мы начнем знакомства, укажите возраст в формате Х-Х (Прим.: 18-20)')
 
     def start(self):
-
         for event in self.long_poll.listen():  # Слушаем сервер
             # Пришло новое сообщение
             if event.type == VkBotEventType.MESSAGE_NEW:
@@ -99,7 +99,7 @@ class Server:
             "Больше этот человек не попадется...": '/не нравится',
             "Загружаем избранных...": '/избранные',
             "Загружаем черный список...": '/черный список',
-            "Загружаю следующего пользователя...": '/дальше чс',
+            "Загружаю следующего пользователя чс...": '/дальше чс',
             "Загружаю следующего избранного...": '/дальше избранные',
             "Удаляю из черного списка...": '/удалить из чс',
             "Удаляю из списка избранных...": '/удалить из избранных',
@@ -135,7 +135,9 @@ class Server:
         kbrd.add_line()
         kbrd.add_callback_button("Вернуться к поиску", keyboard.VkKeyboardColor.SECONDARY,
                                  payload={"type": "show_snackbar", "text": "Возвращаемся к поиску партнера"})
+        kbrd.add_line()
         kbrd.add_callback_button("Удалить из списка", keyboard.VkKeyboardColor.SECONDARY, payload={"type": "show_snackbar", "text": "Удаляю из черного списка..."})
+        kbrd.add_line()
         kbrd.add_callback_button("Отключить клавиатуру", keyboard.VkKeyboardColor.NEGATIVE,
                                  payload={"type": "show_snackbar", "text": "Клавиатура отключена"})
         return kbrd.get_keyboard()
@@ -147,7 +149,9 @@ class Server:
         kbrd.add_line()
         kbrd.add_callback_button("Вернуться к поиску", keyboard.VkKeyboardColor.SECONDARY,
                                  payload={"type": "show_snackbar", "text": "Возвращаемся к поиску партнера"})
+        kbrd.add_line()
         kbrd.add_callback_button("Удалить из списка", keyboard.VkKeyboardColor.SECONDARY, payload={"type": "show_snackbar", "text": "Удаляю из списка избранных..."})
+        kbrd.add_line()
         kbrd.add_callback_button("Отключить клавиатуру", keyboard.VkKeyboardColor.NEGATIVE,
                                  payload={"type": "show_snackbar", "text": "Клавиатура отключена"})
         return kbrd.get_keyboard()
