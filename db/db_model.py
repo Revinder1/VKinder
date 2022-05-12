@@ -1,15 +1,14 @@
 import sqlalchemy as sq
-from sqlalchemy import create_engine, Table, Integer, String, Column, DateTime, ForeignKey, Numeric
+from sqlalchemy import Integer, String, Column, ForeignKey
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-
 
 engine = sq.create_engine('postgresql://postgres:575863@localhost:5432/VKinder')
 Base = declarative_base()
 
 
-
+# Создание модели базы данных
 class User(Base):
     __tablename__ = 'user'
 
@@ -46,44 +45,39 @@ class BlackList(Base):
     user = relationship("User", back_populates="blocked_user")
 
 
+# Класс для работы с базой данных
 class DbWorker:
     def __init__(self, user_id):
         self.user_id = user_id
         Base.metadata.create_all(bind=engine)
         self.session = sessionmaker(bind=engine)()
 
+    # Регистрируем пользователя в бд
     def register_user(self):
         try:
             user = User(vk_id=self.user_id)
             self.session.add(user)
             self.session.commit()
-            print('Юзер зареган')
             return True
         except (IntegrityError, InvalidRequestError):
-            print('Юзер не зареган')
             return False
 
+    # Добавляем пару в список избранных
     def add_pair_in_favorite(self, pair_id, city, age_interval, link, link_photo):
         current_user = self.session.query(User).filter_by(vk_id=self.user_id).first()
-        try:
-            # Мб добавить в переменную id user'a
-            pair = FavoriteUser(
-                vk_id=pair_id,
-                city=city,
-                age_interval=age_interval,
-                link=link,
-                link_photo_list=link_photo,
-                id_user=current_user.id
+        pair = FavoriteUser(
+            vk_id=pair_id,
+            city=city,
+            age_interval=age_interval,
+            link=link,
+            link_photo_list=link_photo,
+            id_user=current_user.id
             )
-            self.session.add(pair)
-            # Мб превратить в переменную и в скобки убрать
-            self.session.commit()
-            print('юзер добавлен в избранное')
-            return True
-        except (IntegrityError, InvalidRequestError):
-            print('юзер не добавлен в избранное')
-            return False
+        self.session.add(pair)
+        self.session.commit()
+        return True
 
+    # Добавляем пару в черный список
     def add_pair_in_blacklist(self, pair_id, city, age_interval, link, link_photo):
         current_user = self.session.query(User).filter_by(vk_id=self.user_id).first()
         pair = BlackList(
@@ -96,47 +90,48 @@ class DbWorker:
             )
         self.session.add(pair)
         self.session.commit()
-        print('юзер добавлен в блеклист')
         return True
-        # except (IntegrityError, InvalidRequestError):
-        #     print('юзер не добавлен в блеклист')
-        #     return False
 
+    # Удалить пару из избранных
     def delete_from_favorite(self, pair_id):
         pair = self.session.query(FavoriteUser).filter_by(vk_id=pair_id).first()
         self.session.delete(pair)
         self.session.commit()
 
+    # Удалить пару из черного списка
     def delete_from_blacklist(self, pair_id):
         pair = self.session.query(BlackList).filter_by(vk_id=pair_id).first()
         self.session.delete(pair)
         self.session.commit()
 
+    # Выдать список избранных по одному с помощью генератора
     def show_favorites(self):
         current_users_id = self.session.query(User).filter_by(vk_id=self.user_id).first()
         all_users_favourites = self.session.query(FavoriteUser).filter_by(id_user=current_users_id.id).all()
         for i in all_users_favourites:
             yield i
 
+    # Выдать черный список по одному с помощью генератора
     def show_blacklist(self):
         current_users_id = self.session.query(User).filter_by(vk_id=self.user_id).first()
         all_users_blacklist = self.session.query(BlackList).filter_by(id_user=current_users_id.id).all()
         for i in all_users_blacklist:
             yield i
 
+    # Проверка есть ли пользователь в бд
     def check_if_registered(self):
         if self.session.query(User).filter_by(vk_id=self.user_id).first():
             return True
         return False
 
+    # Проверка есть ли пользователь в списке избранных
     def check_if_in_favorites(self, pair_id):
         if self.session.query(FavoriteUser).filter_by(vk_id=pair_id).first():
             return True
         return False
 
+    # Проверка есть ли пользователь в черном списке
     def check_if_in_blacklist(self, pair_id):
         if self.session.query(BlackList).filter_by(vk_id=pair_id).first():
             return True
         return False
-
-
