@@ -44,40 +44,45 @@ class Commander(server.Server):
                 if self.age_from == 0:
                     self.send_msg(self.peer_id, message='Введите возрастной диапазон X-X (Прим.: 18-20)')
                 self.generator = self.user.search_user_pair_info(self.city, self.age_from, self.age_to)
-                post = generator_reader(self.generator)['id']
-                post_link = f'https://vk.com/id{post} '
-                ok = True
-###########
-                    if not self.db.check_if_in_favorites(post) or not self.db.check_if_in_blacklist(post):
+                while True:
+                    post = generator_reader(self.generator)['id']
+                    post_link = f'https://vk.com/id{post} '
+                    if not self.db.check_if_in_favorites(post) and not self.db.check_if_in_blacklist(post):
                         self.send_msg(self.peer_id, message=f'{post_link}',
                                       attachment=self.get_img_attachment(self.user.get_best_three_photo(post)))
                         self.previous_id = post
                         self.previous_link = post_link
-                    else:
-                        post = generator_reader(self.generator)['id']
-                        post_link = f'https://vk.com/id{post} '
-                    ok = not ok
+                        break
+                    continue
 
             if msg[1::].lower() == 'нравится':
                 self.db.add_pair_in_favorite(self.previous_id, self.city, self.age_interval, self.previous_link,
                                              self.get_img_attachment(self.user.get_best_three_photo(self.previous_id)))
-                post = generator_reader(self.generator)['id']
-                post_link = f'https://vk.com/id{post} '
-                self.send_msg(self.peer_id, message=f'{post_link}',
-                              attachment=self.get_img_attachment(self.user.get_best_three_photo(post)))
-                self.previous_id = post
-                self.previous_link = post_link
+                while True:
+                    post = generator_reader(self.generator)['id']
+                    post_link = f'https://vk.com/id{post} '
+                    if not self.db.check_if_in_favorites(post) and not self.db.check_if_in_blacklist(post):
+                        self.send_msg(self.peer_id, message=f'{post_link}',
+                                      attachment=self.get_img_attachment(self.user.get_best_three_photo(post)))
+                        self.previous_id = post
+                        self.previous_link = post_link
+                        break
+                    continue
 
 
             if msg[1::].lower() == 'не нравится':
                 self.db.add_pair_in_blacklist(self.previous_id, self.city, self.age_interval, self.previous_link,
                                               self.get_img_attachment(self.user.get_best_three_photo(self.previous_id)))
-                post = generator_reader(self.generator)['id']
-                post_link = f'https://vk.com/id{post} '
-                self.send_msg(self.peer_id, message=f'{post_link}',
-                              attachment=self.get_img_attachment(self.user.get_best_three_photo(post)))
-                self.previous_id = post
-                self.previous_link = post_link
+                while True:
+                    post = generator_reader(self.generator)['id']
+                    post_link = f'https://vk.com/id{post} '
+                    if not self.db.check_if_in_favorites(post) and not self.db.check_if_in_blacklist(post):
+                        self.send_msg(self.peer_id, message=f'{post_link}',
+                                      attachment=self.get_img_attachment(self.user.get_best_three_photo(post)))
+                        self.previous_id = post
+                        self.previous_link = post_link
+                        break
+                    continue
 
             if msg[1::].lower() == 'черный список':
                 gen = self.db.show_blacklist()

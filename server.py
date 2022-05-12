@@ -140,8 +140,21 @@ class Server:
 
 
 
-
-
+    def switcher(self, event, from_id, peer_id):
+        texts = {
+            "Подбираю пару...": '/старт',
+            "Добавляем в избранное...": '/нравится',
+            "Больше этот человек не попадется...": '/не нравится',
+            "Загружаем избранных...": '/избранные',
+            "Загружаем черный список...": '/черный список'
+        }
+        if event.object['payload'].get('text') in texts:
+            r = self.vk_api.messages.sendMessageEventAnswer(
+                event_id=event.object['event_id'],
+                user_id=from_id,
+                peer_id=peer_id,
+                event_data=json.dumps(event.object['payload']))
+            self.users[from_id][peer_id].handle_message(texts[event.object['payload'].get('text')])
 
     @staticmethod
     def create_keyboard():
@@ -157,3 +170,13 @@ class Server:
                                  payload={"type": "show_snackbar", "text": "Загружаем черный список..."})
         kbrd.add_callback_button("Отключить клавиатуру", keyboard.VkKeyboardColor.NEGATIVE, payload={"type": "show_snackbar", "text": "Клавиатура отключена"})
         return kbrd.get_keyboard()
+
+    @staticmethod
+    def create_bl_keyboard():
+        kbrd = keyboard.VkKeyboard(one_time=False)
+        kbrd.add_callback_button("Дальше", keyboard.VkKeyboardColor.SECONDARY, payload={"type": "show_snackbar", "text": "Загружаю следующего пользователя..."})
+        kbrd.add_line()
+        kbrd.add_callback_button("Удалить из списка", keyboard.VkKeyboardColor.PRIMARY, payload={"type": "show_snackbar", "text": "Удаляю из черного списка..."})
+        kbrd.add_callback_button("Вернуться к поиску", keyboard.VkKeyboardColor.PRIMARY,
+                                 payload={"type": "show_snackbar", "text": "Возвращаемся к поиску партнера"})
+
