@@ -18,7 +18,6 @@ class User(Base):
     blocked_user = relationship("BlackList", back_populates="user")
 
 
-
 class FavoriteUser(Base):
     __tablename__ = 'users_favorite'
 
