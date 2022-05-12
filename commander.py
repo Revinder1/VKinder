@@ -26,6 +26,8 @@ class Commander(server.Server):
         self.age_to = 0
         self.age_pattern = r"(\d{2})-(\d{2,3})"
         self.generator = 0
+        self.bl_generator = 0
+        self.fav_generator = 0
         self.city = self.user.get_user_city()
         self.previous_id = 0
         self.previous_link = ''
@@ -85,9 +87,55 @@ class Commander(server.Server):
                     continue
 
             if msg[1::].lower() == 'черный список':
-                gen = self.db.show_blacklist()
+                try:
+                    self.bl_generator = self.db.show_blacklist()
+                    bl_link = generator_reader(self.bl_generator)
+                    link = bl_link.link
+                    photos = bl_link.link_photo_list
+                    self.send_msg(self.peer_id, message=f'{link}', attachment=self.get_img_attachment(photos))
+                    self.send_msg(self.peer_id, message='Ваш черный список',
+                                  keyboard=self.create_bl_keyboard())
+                except StopIteration:
+                    self.send_msg(self.peer_id, message='Черный список пуст, возвращаю к поиску партнера')
+                    self.send_msg(self.peer_id, message='Нажмите "Старт", чтобы начать знакомиться',
+                                  keyboard=self.create_keyboard())
 
-                self.send_msg(self.peer_id, message=f'{next(gen)}')
+            if msg[1::].lower() == '/избранные':
+                try:
+                    self.bl_generator = self.db.show_favorites()
+                    fav_link = generator_reader(self.fav_generator)
+                    link = fav_link.link
+                    photos = fav_link.link_photo_list
+                    self.send_msg(self.peer_id, message=f'{link}', attachment=self.get_img_attachment(photos))
+                    self.send_msg(self.peer_id, message='Ваш черный список',
+                                  keyboard=self.create_fav_keyboard())
+                except StopIteration:
+                    self.send_msg(self.peer_id, message='Список избранных пуст, возвращаю к поиску партнера')
+                    self.send_msg(self.peer_id, message='Нажмите "Старт", чтобы начать знакомиться',
+                                  keyboard=self.create_keyboard())
+
+
+            if msg[1::].lower() == '/дальше чс':
+                try:
+                    bl_link = generator_reader(self.bl_generator)
+                    link = bl_link.link
+                    photos = bl_link.link_photo_list
+                    self.send_msg(self.peer_id, message=f'{link}', attachment=self.get_img_attachment(photos))
+                except StopIteration:
+                    self.send_msg(self.peer_id, message='Черный список пуст, возвращаю к поиску партнера')
+                    self.send_msg(self.peer_id, message='Нажмите "Старт", чтобы начать знакомиться',
+                                  keyboard=self.create_keyboard())
+
+            if msg[1::].lower() == '/дальше избранные':
+                try:
+                    fav_link = generator_reader(self.fav_generator)
+                    link = fav_link.link
+                    photos = fav_link.link_photo_list
+                    self.send_msg(self.peer_id, message=f'{link}', attachment=self.get_img_attachment(photos))
+                except StopIteration:
+                    self.send_msg(self.peer_id, message='Список избранных пуст, возвращаю к поиску партнера')
+                    self.send_msg(self.peer_id, message='Нажмите "Старт", чтобы начать знакомиться',
+                                  keyboard=self.create_keyboard())
 
 
 

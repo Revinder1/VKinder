@@ -56,19 +56,6 @@ class Server:
                 msg_text = event.object["message"]["text"]
                 msg_type = event.object["message"]["id"]
                 print(event.object)
-                #
-                # if '/старт' in msg_text.lower():
-                #     user_init = user_initialiser.UserInfo(from_id)
-                #     generator = user_init.search_user_pair_info(49, 23, 24)
-                #     post = commander.generator_reader(generator)['id']
-                #     post_link = f'https://vk.com/id{post} '
-                #     self.send_msg(peer_id, message=f'{post_link}',
-                #                   attachment=self.get_img_attachment(user_init.get_best_three_photo(post)))
-                # elif '/дальше' in msg_text.lower():
-                #     post = commander.generator_reader(generator)['id']
-                #     post_link = f'https://vk.com/id{post} '
-                #     self.send_msg(peer_id, message=f'{post_link}',
-                #                   attachment=self.get_img_attachment(user_init.get_best_three_photo(post)))
 
                 # ПРОВЕРКА НА НАЛИЧИЕ СВЯЗАННОГО ЮЗЕРА-КЛАССА В СЛОВАРЕ
                 if from_id not in self.users:
@@ -99,44 +86,8 @@ class Server:
                         event_data=json.dumps(event.object['payload']))
                     self.send_msg(peer_id, message='клавиатура отключена',
                                   keyboard=open('keyboards/turn_off_keyboard.json', "r", encoding="UTF-8").read())
-                elif event.object['payload'].get('text') == "Подбираю пару...":
-                    r = self.vk_api.messages.sendMessageEventAnswer(
-                        event_id=event.object['event_id'],
-                        user_id=from_id,
-                        peer_id=peer_id,
-                        event_data=json.dumps(event.object['payload']))
-                    self.users[from_id][peer_id].handle_message('/старт')
-                elif event.object['payload'].get('text') == "Добавляем в избранное...":
-                    r = self.vk_api.messages.sendMessageEventAnswer(
-                        event_id=event.object['event_id'],
-                        user_id=from_id,
-                        peer_id=peer_id,
-                        event_data=json.dumps(event.object['payload']))
-                    self.users[from_id][peer_id].handle_message('/нравится')
-
-                elif event.object['payload'].get('text') == "Больше этот человек не попадется...":
-                    r = self.vk_api.messages.sendMessageEventAnswer(
-                        event_id=event.object['event_id'],
-                        user_id=from_id,
-                        peer_id=peer_id,
-                        event_data=json.dumps(event.object['payload']))
-                    self.users[from_id][peer_id].handle_message('/не нравится')
-
-                elif event.object['payload'].get('text') == "Загружаем избранных...":
-                    r = self.vk_api.messages.sendMessageEventAnswer(
-                        event_id=event.object['event_id'],
-                        user_id=from_id,
-                        peer_id=peer_id,
-                        event_data=json.dumps(event.object['payload']))
-                    self.users[from_id][peer_id].handle_message('/избранные')
-
-                elif event.object['payload'].get('text') == "Загружаем черный список...":
-                    r = self.vk_api.messages.sendMessageEventAnswer(
-                        event_id=event.object['event_id'],
-                        user_id=from_id,
-                        peer_id=peer_id,
-                        event_data=json.dumps(event.object['payload']))
-                    self.users[from_id][peer_id].handle_message('/черный список')
+                else:
+                    self.switcher(event, from_id, peer_id)
 
 
 
@@ -146,7 +97,11 @@ class Server:
             "Добавляем в избранное...": '/нравится',
             "Больше этот человек не попадется...": '/не нравится',
             "Загружаем избранных...": '/избранные',
-            "Загружаем черный список...": '/черный список'
+            "Загружаем черный список...": '/черный список',
+            "Загружаю следующего пользователя...": '/дальше чс',
+            "Загружаю следующего избранного...": '/дальше избранные',
+            "Удаляю из черного списка...": '/удалить чс',
+            "Удаляю из списка избранных...": '/удалить избранных'
         }
         if event.object['payload'].get('text') in texts:
             r = self.vk_api.messages.sendMessageEventAnswer(
@@ -174,9 +129,23 @@ class Server:
     @staticmethod
     def create_bl_keyboard():
         kbrd = keyboard.VkKeyboard(one_time=False)
-        kbrd.add_callback_button("Дальше", keyboard.VkKeyboardColor.SECONDARY, payload={"type": "show_snackbar", "text": "Загружаю следующего пользователя..."})
+        kbrd.add_callback_button("Дальше", keyboard.VkKeyboardColor.PRIMARY, payload={"type": "show_snackbar", "text": "Загружаю следующего пользователя чс..."})
         kbrd.add_line()
-        kbrd.add_callback_button("Удалить из списка", keyboard.VkKeyboardColor.PRIMARY, payload={"type": "show_snackbar", "text": "Удаляю из черного списка..."})
-        kbrd.add_callback_button("Вернуться к поиску", keyboard.VkKeyboardColor.PRIMARY,
+        kbrd.add_callback_button("Вернуться к поиску", keyboard.VkKeyboardColor.SECONDARY,
                                  payload={"type": "show_snackbar", "text": "Возвращаемся к поиску партнера"})
+        kbrd.add_callback_button("Удалить из списка", keyboard.VkKeyboardColor.SECONDARY, payload={"type": "show_snackbar", "text": "Удаляю из черного списка..."})
+        kbrd.add_callback_button("Отключить клавиатуру", keyboard.VkKeyboardColor.NEGATIVE,
+                                 payload={"type": "show_snackbar", "text": "Клавиатура отключена"})
+        return kbrd.get_keyboard()
 
+    @staticmethod
+    def create_fav_keyboard():
+        kbrd = keyboard.VkKeyboard(one_time=False)
+        kbrd.add_callback_button("Дальше", keyboard.VkKeyboardColor.PRIMARY, payload={"type": "show_snackbar", "text": "Загружаю следующего избранного..."})
+        kbrd.add_line()
+        kbrd.add_callback_button("Вернуться к поиску", keyboard.VkKeyboardColor.SECONDARY,
+                                 payload={"type": "show_snackbar", "text": "Возвращаемся к поиску партнера"})
+        kbrd.add_callback_button("Удалить из списка", keyboard.VkKeyboardColor.SECONDARY, payload={"type": "show_snackbar", "text": "Удаляю из списка избранных..."})
+        kbrd.add_callback_button("Отключить клавиатуру", keyboard.VkKeyboardColor.NEGATIVE,
+                                 payload={"type": "show_snackbar", "text": "Клавиатура отключена"})
+        return kbrd.get_keyboard()

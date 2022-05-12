@@ -115,12 +115,14 @@ class DbWorker:
     def show_favorites(self):
         current_users_id = self.session.query(User).filter_by(vk_id=self.user_id).first()
         all_users_favourites = self.session.query(FavoriteUser).filter_by(id_user=current_users_id.id).all()
-        yield all_users_favourites
+        for i in all_users_favourites:
+            yield all_users_favourites
 
     def show_blacklist(self):
         current_users_id = self.session.query(User).filter_by(vk_id=self.user_id).first()
         all_users_blacklist = self.session.query(BlackList).filter_by(id_user=current_users_id.id).all()
-        yield all_users_blacklist
+        for i in all_users_blacklist:
+            yield i
 
     def check_if_registered(self):
         if self.session.query(User).filter_by(vk_id=self.user_id).first():
