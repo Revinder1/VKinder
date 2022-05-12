@@ -60,7 +60,6 @@ class UserInfo:
         if self.get_user_gender() == 'Женский':
             params['sex'] = 2
         # Сбор данных по поиску, обходя лимит в 1000 пользователей
-        a = datetime.now()
         for j in range(1, 13):
             res = requests.get('https://api.vk.com/method/' + 'users.search', params=params).json()
             for i in res['response']['items']:
@@ -71,8 +70,6 @@ class UserInfo:
                     i = {'id': i["id"], 'link': link, 'first_name': i['first_name'], 'last_name': i['last_name'],
                          'city': i['city']['title']}
                     yield i
-                    b = datetime.now()
-                    print(b - a, 'eto yield')
             params['birth_month'] += 1
 
 

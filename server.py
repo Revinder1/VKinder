@@ -136,7 +136,7 @@ class Server:
                         user_id=from_id,
                         peer_id=peer_id,
                         event_data=json.dumps(event.object['payload']))
-                    self.users[from_id][peer_id].handle_message('/не нравится')
+                    self.users[from_id][peer_id].handle_message('/черный список')
 
 
 
@@ -148,12 +148,12 @@ class Server:
         kbrd = keyboard.VkKeyboard(one_time=False)
         kbrd.add_callback_button("Старт", keyboard.VkKeyboardColor.PRIMARY, payload={"type": "show_snackbar", "text": "Подбираю пару..."})
         kbrd.add_line()
-        kbrd.add_button("Не нравится", keyboard.VkKeyboardColor.NEGATIVE, payload={"type": "show_snackbar", "text": "Больше этот человек не попадется..."})
+        kbrd.add_callback_button("Не нравится", keyboard.VkKeyboardColor.NEGATIVE, payload={"type": "show_snackbar", "text": "Больше этот человек не попадется..."})
         kbrd.add_callback_button("Нравится", keyboard.VkKeyboardColor.POSITIVE, payload={"type": "show_snackbar", "text": "Добавляем в избранное..."})
         kbrd.add_line()
-        kbrd.add_callback_button("Показать избранное", keyboard.VkKeyboardColor.PRIMARY,
+        kbrd.add_callback_button("Избранное", keyboard.VkKeyboardColor.PRIMARY,
                                  payload={"type": "show_snackbar", "text": "Загружаем избранных..."})
-        kbrd.add_callback_button("Показать черный список", keyboard.VkKeyboardColor.PRIMARY,
+        kbrd.add_callback_button("Черный список", keyboard.VkKeyboardColor.PRIMARY,
                                  payload={"type": "show_snackbar", "text": "Загружаем черный список..."})
         kbrd.add_callback_button("Отключить клавиатуру", keyboard.VkKeyboardColor.NEGATIVE, payload={"type": "show_snackbar", "text": "Клавиатура отключена"})
         return kbrd.get_keyboard()
