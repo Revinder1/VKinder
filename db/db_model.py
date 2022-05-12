@@ -116,7 +116,7 @@ class DbWorker:
         current_users_id = self.session.query(User).filter_by(vk_id=self.user_id).first()
         all_users_favourites = self.session.query(FavoriteUser).filter_by(id_user=current_users_id.id).all()
         for i in all_users_favourites:
-            yield all_users_favourites
+            yield i
 
     def show_blacklist(self):
         current_users_id = self.session.query(User).filter_by(vk_id=self.user_id).first()

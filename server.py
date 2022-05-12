@@ -37,6 +37,7 @@ class Server:
             image = self.session.get(url, stream=True)
             photo = self.upload.photo_messages(photos=image.raw)[0]
             attachments.append(f'photo{photo["owner_id"]}_{photo["id"]}')
+
         return ','.join(attachments)
 
     def menu_bot(self, from_id, peer_id):
@@ -100,8 +101,9 @@ class Server:
             "Загружаем черный список...": '/черный список',
             "Загружаю следующего пользователя...": '/дальше чс',
             "Загружаю следующего избранного...": '/дальше избранные',
-            "Удаляю из черного списка...": '/удалить чс',
-            "Удаляю из списка избранных...": '/удалить избранных'
+            "Удаляю из черного списка...": '/удалить из чс',
+            "Удаляю из списка избранных...": '/удалить из избранных',
+            "Возвращаемся к поиску партнера": '/вернуться'
         }
         if event.object['payload'].get('text') in texts:
             r = self.vk_api.messages.sendMessageEventAnswer(
