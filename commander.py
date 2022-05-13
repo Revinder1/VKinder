@@ -195,20 +195,7 @@ class Commander(server.Server):
             self.age_to = int(msg[3:])
             self.send_msg(self.peer_id, message='Чтобы перейти далее введите /начать')
 
-    def check_duplicates(self, generator):
-        while True:
-            post = generator_reader(self.generator)['id']
-            post_link = f'https://vk.com/id{post} '
-            # Если пара не в списках, отправить пользователю его ссылку и фото
-            if not self.db.check_if_in_favorites(post) and not self.db.check_if_in_blacklist(post):
-                self.send_msg(self.peer_id, message=f'{post_link}',
-                              attachment=self.get_img_attachment(self.user.get_best_three_photo(post)))
-                self.previous_id = post
-                self.previous_link = post_link
-                break
-            continue
-
-
+   
 # Выдача значений генератора
 def generator_reader(generator):
     return next(generator)
