@@ -3,8 +3,9 @@ from sqlalchemy import Integer, String, Column, ForeignKey
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+import config
 
-engine = sq.create_engine('postgresql://postgres:123456@localhost:5432/VKinder')
+engine = sq.create_engine(config.db_adress)
 Base = declarative_base()
 
 
