@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import config
 
-engine = sq.create_engine(config.db_adress)
+engine = sq.create_engine(f'postgresql://{config.db_user}:{config.db_password}@localhost:5432/{config.db_name}')
 Base = declarative_base()
 
 
